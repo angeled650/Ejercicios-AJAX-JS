@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitio Con AJAX</title>
+</head>
+
+<style>
+  html {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    font-size: 16px;
+  }
+
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  main {
+    flex-grow: 1;
+  }
+
+  .container {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 992px;
+  }
+
+  .header {
+    padding: .5rem;
+    background-color: antiquewhite;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo img {
+    width: 3rem;
+    height: auto;
+  }
+
+  .menu {
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 115%;
+  }
+
+  .menu a {
+    color: chocolate;
+    justify-content: center;
+    padding: 0 1vw;
+    transition: all .3s ease-in-out;
+  }
+
+  .menu a:hover {
+    opacity: 75%
+  }
+</style>
+
+<body>
+  <header class="header">
+    <section class="header-content container">
+      <article class="logo">
+        <img src="https://jonmircha.com/img/kEnAi.svg" alt="kEnAi">
+      </article>
+      <nav class="menu">
+        <a href="assets/home.html">Home</a>
+        <a href="assets/contacto.html">Contacto</a>
+        <a href="assets/informacion.html">Información</a>
+      </nav>
+    </section>
+  </header>
+
+  <main class="container">
+
+  </main>
+  <script>
+    const d = document,
+      $main = d.querySelector("main");
+
+    const getHTML = async (url) => {
+      let ajax = await fetch(`${url}`),
+        res = await ajax.text();
+      $main.innerHTML = res;
+    }
+    d.addEventListener("DOMContentLoaded", getHTML("assets/home.html"));
+
+    d.addEventListener("click", async e => {
+      console.log(e)
+      if (e.target.matches(".menu a")) {
+        e.preventDefault();
+
+        getHTML(e.target.href);
+      }
+    })
+
+  </script>
+</body>
+<footer class="footer container">
+  <small><b>Página hecha por mí - 2022</b></small>
+</footer>
+
+</html>

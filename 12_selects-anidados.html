@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selects Anidados</title>
+  <style>
+    html {
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    *,
+    *::after,
+    *::before {
+      box-sizing: inherit;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Selects Anidados</h1>
+  <h2>Venezuela</h2>
+
+  <label for="select-primary">Estados</label>
+  <select name="primary" id="select-primary">
+    <option value="">Elige un Estado</option>
+  </select>
+  <p></p>
+  <label for="select-secondary">Municipios</label>
+  <select name="secondary" id="select-secondary">
+    <option value="">Elige un Municipio</option>
+  </select>
+  <p></p>
+  <label for="select-terciary">Parroquias</label>
+  <select name="terciary" id="select-terciary">
+    <option value="">Elige una Parroquia</option>
+  </select>
+  <p></p>
+
+  <script>
+    const d = document,
+      $selectPri = d.getElementById("select-primary"),
+      $selectSec = d.getElementById("select-secondary"),
+      $selectTer = d.getElementById("select-terciary");
+
+    async function loadEstados() {
+      let $template = "";
+      try {
+        let res = await fetch("./assets/venezuela.json"),
+          json = await res.json();
+
+        if (!res.ok) throw { status: res.status, statusText: res.statusText }
+
+        json.forEach(el => {
+          $template += `
+          <option value="${el.estado}">${el.estado}</option>
+          `;
+        })
+
+        $selectPri.insertAdjacentHTML("beforeend", $template)
+      } catch (err) {
+        let message = err.statusText || "Ha ocurrido un error al realizar la petición, intente de nuevo.";
+
+        $selectPri.nextElementSibling.innerHTML = `<p>Error ${err.status}: ${message}</p>`
+      }
+    }
+
+    async function loadMunicipios(nombreEstado) {
+      let $template = "";
+      try {
+        let res = await fetch("./assets/venezuela.json"),
+          json = await res.json(),
+          estadoSeleccionado = json.find(el => {
+            return el.estado === nombreEstado;
+          });
+
+        if (!res.ok) throw { status: res.status, statusText: res.statusText }
+
+        estadoSeleccionado.municipios.forEach(el => {
+          $template += `
+          <option value="${el.municipio}">${el.municipio}</option>
+          `;
+        })
+
+        $selectSec.insertAdjacentHTML("beforeend", $template)
+      } catch (err) {
+        let message = err.statusText || "Ha ocurrido un error al realizar la petición, intente de nuevo.";
+
+        $selectSec.nextElementSibling.innerHTML = `<p>Error ${err.status}: ${message}</p>`
+      }
+    }
+
+    async function loadParroquias(nombreEstado, nombreMunicipio) {
+      let $template = "";
+      try {
+        let res = await fetch("./assets/venezuela.json"),
+          json = await res.json(),
+          estadoSeleccionado = json.find(el => {
+            return el.estado === nombreEstado;
+          }),
+          municipioSeleccionado = estadoSeleccionado.municipios.find(el => {
+            return el.municipio === nombreMunicipio;
+          });
+
+        if (!res.ok) throw { status: res.status, statusText: res.statusText }
+
+        municipioSeleccionado.parroquias.forEach(el => {
+          $template += `
+          <option value="${el}">${el}</option>
+          `;
+        })
+
+        $selectTer.insertAdjacentHTML("beforeend", $template)
+      } catch (err) {
+        let message = err.statusText || "Ha ocurrido un error al realizar la petición, intente de nuevo.";
+
+        $selectTer.nextElementSibling.innerHTML = `<p>Error ${err.status}: ${message}</p>`
+      }
+    }
+
+    d.addEventListener("DOMContentLoaded", loadEstados);
+
+    $selectPri.addEventListener("change", e => {
+      if (e.target.value != "") {
+        $selectSec.innerHTML = ` <option value="">Elige un Municipio</option>`
+        $selectTer.innerHTML = ` <option value="">Elige una Parroquia</option>`
+        loadMunicipios(e.target.value)
+      }
+      else {
+        $selectSec.innerHTML = ` <option value="">Elige un Municipio</option>`
+        $selectTer.innerHTML = ` <option value="">Elige una Parroquia</option>`
+      }
+    });
+
+    $selectSec.addEventListener("change", e => {
+      if (e.target.value != "") {
+        $selectTer.innerHTML = ` <option value="">Elige una Parroquia</option>`
+        loadParroquias($selectPri.value, e.target.value)
+      }
+      else {
+        $selectTer.innerHTML = ` <option value="">Elige una Parroquia</option>`
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout con Stripe</title>
+  <style>
+    html {
+      box-sizing: border-box;
+      font-family: sans-serif;
+      font-size: 16px;
+    }
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
+    }
+
+    .pizzas {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .pizzas>* {
+      flex: 1 1 200px;
+      margin: 1rem;
+    }
+
+    .pizza {
+      background-color: crimson;
+      color: chartreuse;
+      font-size: 125%;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease-out;
+
+    }
+
+    .pizza:hover {
+      opacity: 0.9;
+      transform: scale(0.9);
+    }
+
+    .pizza img {
+      max-width: 100%;
+      height: auto;
+      min-height: 230px;
+      object-fit: cover;
+    }
+
+    .pizza figcaption {
+      padding: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Checkout con Stripe</h1>
+  <section id="pizzas" class="pizzas"></section>
+  <template id="pizza-template">
+    <figure class="pizza">
+      <img src="" alt="">
+      <figcaption></figcaption>
+    </figure>
+  </template>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="assets/stripe-checkout.js" type="module"></script>
+</body>
+
+</html>

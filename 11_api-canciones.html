@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscador de Canciones</title>
+  <style>
+    html {
+      font-family: sans-serif;
+      box-sizing: border-box;
+    }
+
+    *,
+    *::after,
+    *::before {
+      box-sizing: inherit;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .loader {
+      display: none;
+      margin: auto;
+    }
+
+    .song blockquote {
+      white-space: pre-wrap;
+    }
+
+    .song h2 {
+      text-align: left;
+      padding-left: 2rem;
+    }
+
+    .artist p:last-child {
+      white-space: pre-wrap;
+    }
+
+    @media screen and (min-width: 800px) {
+      main {
+        flex-direction: row;
+      }
+
+      main>* {
+        padding: 1rem;
+        flex-basis: 50%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Buscador de Canciones</h1>
+  <form id="song-search">
+    <input type="text" name="artist" placeholder="Nombre del Artista" required>
+    <br>
+    <input type="text" name="song" placeholder="Nombre de la Canción" required>
+    <br><br>
+    <input type="submit" value="Enviar">
+  </form>
+  <img class="loader" src="./assets/bars.svg" alt="Cargando...">
+  <aside class="error"></aside>
+  <main>
+    <article class="artist"> </article>
+    <article class="song"></article>
+  </main>
+
+  <script>
+    const d = document,
+      token = "boatiPpnKpAFliBLXivcJYEcMaMkljxaQZhFEldg",
+      $form = d.getElementById("song-search"),
+      $loader = d.querySelector(".loader"),
+      $error = d.querySelector(".error"),
+      $main = d.querySelector("main"),
+      $artist = d.querySelector(".artist"),
+      $song = d.querySelector(".song");
+
+    $form.addEventListener("submit", async e => {
+      e.preventDefault()
+      try {
+        $loader.style.display = "block";
+
+        let artist = e.target.artist.value.toLowerCase(),
+          song = e.target.song.value.toLowerCase(),
+          $artistTemplate = "",
+          $songTemplate = "",
+          // artistAPI = `https://www.theaudiodb.com/api/v1/json/2/search.php?s=${artist}`,
+          artistAPI = `https://api.discogs.com/database/search?type=artist&q=${artist}&token=${token}`,
+          songAPI = `http://api.allorigins.win/get?url=https://lyrist.vercel.app/api/${song}/${artist}`,
+          artistFetch = fetch(artistAPI),
+          songFetch = fetch(songAPI),
+          [artistRes, songRes] = await Promise.all([artistFetch, songFetch]),
+          artistData = await artistRes.json(),
+          songJSON = await songRes.json(),
+          songData = await JSON.parse(songJSON.contents);
+
+        // Usando la API de TheAudioDB
+        // if (artistData.artists === null) {
+        //   $artistTemplate = `<h2>Artista: <mark>${artist}</mark> no encontrado</h2>`
+        // } else {
+        //   let artist = artistData.artists[0];
+        //   $artistTemplate = `
+        //   <h2>${artist.strArtist}</h2>
+        //   <img src="${artist.strArtistThumb}" alt="${artist.strArtist}">
+        //   <p>${artist.intBornYear} - ${artist.intDiedYear || "Presente"}</p>
+        //   <p>${artist.strCountry}</p>
+        //   <p>${artist.strGenre} - ${artist.strStyle}</p>
+        //   <a href="http://${artist.strWebsite}" target="_blank" rel="noopener">Sitio Web</a>
+        //   <p>${artist.strBiographyEN}</p>
+        //   `
+        // }
+
+        if (artistData["results"].length === 0) {
+          $artistTemplate = `<h2>Artista: <mark>${artist}</mark> no encontrado</h2>`
+        } else {
+          let artist = artistData["results"][0],
+            artistURL = artist.resource_url;
+
+          let artistInfo = await fetch(artistURL),
+            artistJson = await artistInfo.json();
+
+          $artistTemplate = `
+          <h2>${artist.title}</h2>
+          <img src="${artist.cover_image}" alt="${artist.title}">
+          <br>
+          <a href="http://${artistJson["urls"][0]}" target="_blank" rel="noopener">Sitio Web</a>
+          <b><p>${artistJson.realname ? artistJson.realname : ""}</p></b>
+          <p>${artistJson.profile}</p>
+          `
+        }
+
+        if (songData.error) {
+          $songTemplate = `<h2>La canción: <mark>${song}</mark> no existe.</h2>`
+        } else {
+          $songTemplate = `
+          <h2>${songData.title}</h2>
+          <blockquote>${songData.lyrics}</blockquote>
+          `;
+        }
+
+        $loader.style.display = "none";
+        $artist.innerHTML = $artistTemplate;
+        $song.innerHTML = $songTemplate;
+        $form.reset();
+      } catch (err) {
+        console.log(err)
+        let message = err.statusText || "Ha ocurrido un error al realizar la petición, intente de nuevo.";
+        $error.innerthml = `<p> Error ${err.status}: ${message}</p>`
+        $loader.style.display = "none";
+      }
+    })
+  </script>
+</body>
+
+</html>
